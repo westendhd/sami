@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Assignment and Stats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Upload File for Driver Assignment</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        {% if data %}
+        <h2>Review Driver Assignments</h2>
+        <form action="/save" method="post">
+            <table>
+                <tr>
+                    <th>Client Name</th>
+                    <th>Pick-Up Time</th>
+                    <th>Pick-Up Address</th>
+                    <th>Suggested Driver</th>
+                    <th>Edit Driver</th>
+                </tr>
+                {% for row in data %}
+                <tr>
+                    <td>{{ row.CLIENTS_NAME }}</td>
+                    <td>{{ row.PICK_UP_TIME }}</td>
+                    <td>{{ row.PICK_UP_ADDRESS }}</td>
+                    <td>{{ row.Suggested_Driver }}</td>
+                    <td>
+                        <!-- Hidden input to store original row index -->
+                        <input type="hidden" name="original_index_{{ row.index }}" value="{{ row.index }}">
+                        <select name="driver_{{ row.index }}">
+                            {% for driver in drivers %}
+                            <option value="{{ driver }}" {% if driver == row.Suggested_Driver %}selected{% endif %}>{{ driver }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            <button type="submit">Save Changes</button>
+        </form>
+
+        <h2>Driver Stats</h2>
+        <table>
+            <tr>
+                <th>Driver</th>
+                <th>Total Assignments</th>
+                <th>Average Trip Distance (km)</th>
+                <th>Average Trip Duration (min)</th>
+            </tr>
+            {% for driver, stats in driver_stats.items() %}
+            <tr>
+                <td>{{ driver }}</td>
+                <td>{{ stats['total_assignments'] }}</td>
+                <td>{{ stats['average_distance'] }}</td>
+                <td>{{ stats['average_duration'] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Separate download button -->
+        <form action="/download" method="get">
+            <button type="submit">Download CSV</button>
+        </form>
+        {% endif %}
+    </div>
+</body>
+</html>
+
